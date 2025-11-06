@@ -55,13 +55,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkSession = async () => {
     try {
+      // Try to get stored access token from localStorage
+      const storedToken = localStorage.getItem('access_token');
+      
+      if (!storedToken) {
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-d499b637/session`,
         {
           headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
+            'Authorization': `Bearer ${storedToken}`,
           },
-          credentials: 'include',
         }
       );
 
@@ -69,12 +76,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         if (data.session?.user) {
           setUser({ id: data.session.user.id, email: data.session.user.email || '' });
-          setAccessToken(data.session.access_token);
-          await fetchProfile(data.session.access_token);
+          setAccessToken(storedToken);
+          await fetchProfile(storedToken);
+        } else {
+          // Invalid token, clear it
+          localStorage.removeItem('access_token');
         }
+      } else {
+        // Invalid token, clear it
+        localStorage.removeItem('access_token');
       }
     } catch (error) {
       console.error('Error checking session:', error);
+      localStorage.removeItem('access_token');
     } finally {
       setLoading(false);
     }
@@ -107,6 +121,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data.session) {
       setUser({ id: data.session.user.id, email: data.session.user.email || '' });
       setAccessToken(data.session.access_token);
+      // Store access token in localStorage
+      localStorage.setItem('access_token', data.session.access_token);
       await fetchProfile(data.session.access_token);
 
       // Check if user is blocked
@@ -154,6 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error during logout:', error);
     }
     
+    // Clear localStorage
+    localStorage.removeItem('access_token');
     setUser(null);
     setProfile(null);
     setAccessToken(null);

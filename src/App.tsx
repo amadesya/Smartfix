@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AuthPage } from './components/AuthPage';
+import { LandingPage } from './components/LandingPage';
 import { ClientDashboard } from './components/ClientDashboard';
 import { MasterDashboard } from './components/MasterDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -32,7 +32,7 @@ function MainApp() {
   }
 
   if (!user) {
-    return <AuthPage />;
+    return <LandingPage />;
   }
 
   const role = profile?.role || 'client';

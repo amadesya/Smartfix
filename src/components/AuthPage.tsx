@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import { useAuth } from './AuthContext';
 import { useToast } from './Toast';
 
-export function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+interface AuthPageProps {
+  initialMode?: 'signin' | 'signup';
+}
+
+export function AuthPage({ initialMode = 'signin' }: AuthPageProps = {}) {
+  const [isLogin, setIsLogin] = useState(initialMode === 'signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
